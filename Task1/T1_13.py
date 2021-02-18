@@ -41,7 +41,7 @@ def is_progression_exists(num1: int, num2: int, distance: int) -> bool:
 
 def task():
     """
-    Подробное описание задачи см. в файле task.txt <a href = "Task1/task.txt"/>
+    Подробное описание задачи см. в файле task1.md <a href = "Task1/task1.md"/>
     """
     input_list: List[int] = read_file("input.txt")
     # итератор, выбирающий комбинации по 2 без повторений из списка, возвращает в виде кортежа индексов списка
