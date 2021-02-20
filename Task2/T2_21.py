@@ -26,38 +26,51 @@ def read_file(file_name: str) -> types.List[types.List[bool]]:
 
 
 def is_rectangle(matrix: types.List[types.List[bool]], row: int, col: int) -> bool:
-    row_pointer: int = row
-    col_pointer: int = col
-
     if matrix[row][col] is False:
         return False
-    else:
-        # определение размерности прямоугольника
-        while matrix[row][col_pointer + 1] is True:
-            col_pointer += 1
+
+    row_pointer = row
+    col_pointer = col
+
+    try:
         while matrix[row_pointer + 1][col] is True:
             row_pointer += 1
-        # проверка, что внутри заполнения прямоугольника нет пустот
-        for x in range(row, row_pointer + 1):
-            for y in range(col, col_pointer + 1):
-                if matrix[x][y] is False:
-                    return False
-        # проверка периметров
-        for x in range(row - 1, row_pointer + 2):
-            if (matrix[x][col - 1] is True) and (matrix[x][col_pointer + 1] is True):
+    except IndexError as e:
+        row_pointer = len(matrix) - 1
+
+    try:
+        while matrix[row][col_pointer + 1] is True:
+            col_pointer += 1
+    except IndexError as e:
+        col_pointer = len(matrix[0]) - 1
+
+    for x in range(row, row_pointer + 1):
+        for y in range(col, col_pointer + 1):
+            if matrix[x][y] is False:
                 return False
 
-        for y in range(col, col_pointer + 1):
-            if (matrix[row - 1][y] is True) and (matrix[row_pointer + 1][y] is True):
+    frame: types.List[tuple] = []
+    for x in range(row - 1, row_pointer + 2):
+        frame.append((x, col - 1))
+        frame.append((x, col_pointer + 1))
+    for y in range(col, col_pointer + 1):
+        frame.append((row - 1, y))
+        frame.append((row_pointer + 1, y))
+    for point in frame:
+        if (point[0] < 0) or (point[0] >= len(matrix)) or (point[1] < 0) or (point[1] >= len(matrix)):
+            continue
+        else:
+            if matrix[point[0]][point[1]] is True:
                 return False
-        return True
+
+    return True
 
 
 def task(input_file: str):
     matrix: types.List[types.List[bool]] = read_file(input_file)
     for x in range(0, len(matrix)):
         for y in range(0, len(matrix[0])):
-            print(str(is_rectangle(matrix, x, y)) + ' ', end='')
+            print(str(int(is_rectangle(matrix, x, y))) + ' ', end='')
         print()
     write_matrix_in_file('output.txt', read_file(input_file))
 
