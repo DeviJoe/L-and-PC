@@ -1,4 +1,5 @@
 from typing import List
+import typing
 import itertools
 import sys
 from Task1 import DistanceIterator
@@ -50,7 +51,7 @@ def task(file_path: str):
     """
     input_list: List[int] = read_file(file_path)
     # итератор, выбирающий комбинации по 2 без повторений из списка, возвращает в виде кортежа индексов списка
-    comb_iter: iter = itertools.combinations([x for x in range(0, len(input_list) - 1)], 2)
+    comb_iter: typing.Iterator = itertools.combinations([x for x in range(0, len(input_list) - 1)], 2)
     di = DistanceIterator.DistanceIterator(input_list)
 
     # в качестве стартового значения минимального кол-ва перестановок принято максимальное целое число

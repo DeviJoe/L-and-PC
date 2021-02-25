@@ -1,18 +1,33 @@
 import typing as types
+import sys
+from dataclasses import dataclass
+
+
+@dataclass
+class Rectangular:
+    row: int
+    col: int
+    row_pointer: int
+    col_pointer: int
+    square: int
+
 
 # В это место указать путь до файла ввода
 INPUT_FILE_PATH_1 = "input1.txt"
 INPUT_FILE_PATH_2 = "input2.txt"
 
-_max_square = 0
-_results = []
+_max_square: int = 0
+_results: types.List[Rectangular] = []
 
 
-def write_matrix_in_file(file_path: str, matrix: types.List[types.List[bool]]):
+def write_matrix_in_file(file_path: str, matrix: types.List[types.List]):
     output_file: types.TextIO = open(file_path, 'w')
     for arr in matrix:
         for symbol in arr:
-            buf = 1 if symbol is True else 0
+            if type(symbol) == bool:
+                buf = 1 if symbol is True else 0
+            else:
+                buf = symbol
             output_file.write(str(buf) + ' ')
         output_file.write('\n')
     output_file.close()
@@ -22,8 +37,8 @@ def read_file(file_name: str) -> types.List[types.List[bool]]:
     input_file: types.TextIO = open(file_name, 'r')
     matrix: types.List[types.List[bool]] = []
     for line in input_file:
-        line = [bool(int(x)) for x in line.split(" ")]
-        matrix.append(line)
+        buf = [bool(int(x)) for x in line.split(" ")]
+        matrix.append(buf)
     input_file.close()
     return matrix
 
@@ -99,18 +114,56 @@ def update_square(row: int, col: int, col_pointer: int, row_pointer: int):
     global _max_square, _results
     if square >= _max_square:
         _max_square = square
-        _results.append({
-            "point": (row, height),
-            "width": width,
-            "height": height,
-            "square": square})
+        _results.append(Rectangular(row, col, row_pointer, col_pointer, square))
+
+
+def rectangular_to_matrix(rec_dict: Rectangular, matrix) -> types.List[types.List[int]]:
+    res = [[0 for x in range(0, len(matrix[0]))] for y in range(0, len(matrix))]
+    for x in range(rec_dict.row, rec_dict.row_pointer + 1):
+        for y in range(rec_dict.col, rec_dict.col_pointer + 1):
+            res[x][y] = 1
+    return res
 
 
 def clear_results():
     global _results, _max_square
     for rectangle in _results:
-        if rectangle["square"] < _max_square:
+        if rectangle.square < _max_square:
             _results.remove(rectangle)
+
+
+def find_max_up_left_rec_in_res():
+    global _results
+    res_rec: types.List[Rectangular] = []
+    result: Rectangular = Rectangular(0, 0, 0, 0, 0)
+    row = sys.maxsize
+    col = sys.maxsize
+    for rec in _results:
+        if rec.row < row:
+            row = rec.row
+            res_rec.append(rec)
+
+    if res_rec.__len__() == 1:
+        return res_rec[0]
+    else:
+        for rec in res_rec:
+            if rec.col < col:
+                col = rec.col
+                result = rec
+        return result
+
+
+def find_max_left(excepting: Rectangular) -> Rectangular:
+    global _results
+    buf = _results.copy()
+    buf.remove(excepting)
+    col = sys.maxsize
+    res: Rectangular = Rectangular(0, 0, 0, 0, 0)
+    for rec in buf:
+        if rec.col < col:
+            col = rec.col
+            res = rec
+    return res
 
 
 def task(input_file: str):
@@ -119,8 +172,15 @@ def task(input_file: str):
         for y in range(0, len(matrix[0])):
             analyze_rectangle(matrix, x, y)
         clear_results()
+
+    if len(_results) == 1:
+        write_matrix_in_file('output.txt', rectangular_to_matrix(_results[0], matrix))
+    else:
+        res1: Rectangular = find_max_up_left_rec_in_res()
+        res2: Rectangular = find_max_left(res1)
+        write_matrix_in_file('output_1.txt', rectangular_to_matrix(res1, matrix))
+        write_matrix_in_file('output_2.txt', rectangular_to_matrix(res2, matrix))
     print(*_results, sep='\n')
-    write_matrix_in_file('output.txt', read_file(input_file))
 
 
 if __name__ == '__main__':
