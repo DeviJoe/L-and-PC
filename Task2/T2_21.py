@@ -15,6 +15,8 @@ class Rectangular:
 # В это место указать путь до файла ввода
 INPUT_FILE_PATH_1 = "input1.txt"
 INPUT_FILE_PATH_2 = "input2.txt"
+OUTPUT_1 = ''
+OUTPUT_2 = ''
 
 _max_square: int = 0
 _results: types.List[Rectangular] = []
@@ -43,7 +45,7 @@ def read_file(file_name: str) -> types.List[types.List[bool]]:
     return matrix
 
 
-def analyze_rectangle(matrix: types.List[types.List[bool]], row: int, col: int) -> bool:
+def analyze_rectangle(matrix: types.List[types.List[bool]], row: int, col: int) -> Rectangular:
     """
     Получает на вход точку матрицы и, двигаясь вправо и вниз, определяет, является ли данная фигура прямоугольником,
     окруженным пустыми ячейками
@@ -53,7 +55,7 @@ def analyze_rectangle(matrix: types.List[types.List[bool]], row: int, col: int) 
     :return: true/false по результату
     """
     if matrix[row][col] is False:
-        return False
+        return None
 
     # точка окончания прямоугольника по строке
     row_pointer: int = row
@@ -78,7 +80,7 @@ def analyze_rectangle(matrix: types.List[types.List[bool]], row: int, col: int) 
     for x in range(row, row_pointer + 1):
         for y in range(col, col_pointer + 1):
             if matrix[x][y] is False:
-                return False
+                return None
 
     # массив с координатами точек, составляющих "рамку прямоугольника"
     frame: types.List[tuple] = []
@@ -94,12 +96,11 @@ def analyze_rectangle(matrix: types.List[types.List[bool]], row: int, col: int) 
             continue
         else:
             if matrix[point[0]][point[1]] is True:
-                return False
-    update_square(row, col, col_pointer, row_pointer)
-    return True
+                return None
+    return create_rectangular(row, col, row_pointer, col_pointer)
 
 
-def update_square(row: int, col: int, col_pointer: int, row_pointer: int):
+def create_rectangular(row: int, col: int, col_pointer: int, row_pointer: int) -> Rectangular:
     """
     Определяет площадь прямоугольника, зная координату верхнего левого угла и его границы
     (индексы колонок и сторк, в границах которых лежит прямоугольник, см ф-цию выше)
@@ -114,7 +115,7 @@ def update_square(row: int, col: int, col_pointer: int, row_pointer: int):
     global _max_square, _results
     if square >= _max_square:
         _max_square = square
-        _results.append(Rectangular(row, col, row_pointer, col_pointer, square))
+        return Rectangular(row, col, row_pointer, col_pointer, square)
 
 
 def rectangular_to_matrix(rec_dict: Rectangular, matrix) -> types.List[types.List[int]]:
@@ -123,13 +124,6 @@ def rectangular_to_matrix(rec_dict: Rectangular, matrix) -> types.List[types.Lis
         for y in range(rec_dict.col, rec_dict.col_pointer + 1):
             res[x][y] = 1
     return res
-
-
-def clear_results():
-    global _results, _max_square
-    for rectangle in _results:
-        if rectangle.square < _max_square:
-            _results.remove(rectangle)
 
 
 def find_max_up_left_rec_in_res():
@@ -170,8 +164,9 @@ def task(input_file: str):
     matrix: types.List[types.List[bool]] = read_file(input_file)
     for x in range(0, len(matrix)):
         for y in range(0, len(matrix[0])):
-            analyze_rectangle(matrix, x, y)
-        clear_results()
+            buf = analyze_rectangle(matrix, x, y)
+            if buf is not None:
+                _results.append(buf)
 
     if len(_results) == 1:
         write_matrix_in_file('output.txt', rectangular_to_matrix(_results[0], matrix))
