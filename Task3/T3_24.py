@@ -6,7 +6,7 @@ INPUT_CSV_FILE: str = "input.csv"
 MONEY: int = 35
 
 
-def parse_csv_into_dict(file_name: str) -> List[Sweet]:
+def parse_csv_into_list(file_name: str) -> List[Sweet]:
     res: List[Sweet] = []
     with (open(file_name, 'r', encoding='utf-8')) as thread:
         for line in thread:
@@ -98,7 +98,7 @@ def task(sweets: List[Sweet]) -> Tuple[List[Sweet], int]:
 
 
 if __name__ == '__main__':
-    sweet_l: List[Sweet] = parse_csv_into_dict("input.csv")
+    sweet_l: List[Sweet] = parse_csv_into_list("input.csv")
     r, saved_money = task(sweet_l)
     print(*r, sep='\n')
     print(saved_money)

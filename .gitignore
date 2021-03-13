@@ -1,3 +1,5 @@
 /.idea
 /venv
 /.mypy_cache
+Task4/regular.txt
+.gitignore
